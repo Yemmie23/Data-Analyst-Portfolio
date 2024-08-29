@@ -1,5 +1,5 @@
 
-### PORTFOLIO DOCUMENTATION
+### GLOBAL SUPERSTORE ANALYSIS WITH SQL
 
 ---
 
@@ -20,7 +20,8 @@ To achieve this, I first ensured the `Orders` table included a column for the ye
 **Query:**
 ```sql
 -- Add a column to store the year extracted from the shipment date
-ALTER TABLE Orders ADD year INT;
+ALTER TABLE Orders
+ADD year INT;
 
 -- Populate the year column with the year of the shipment date
 UPDATE Orders
