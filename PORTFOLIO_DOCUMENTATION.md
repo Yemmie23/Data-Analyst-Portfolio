@@ -1,0 +1,181 @@
+
+### PORTFOLIO DOCUMENTATION
+
+---
+
+#### Introduction
+
+In this project, I conducted an in-depth analysis of the Global Superstore dataset using SQL queries. The objective was to answer specific business questions by extracting insights from the data. This document outlines the queries used, the logic behind them, and the conclusions drawn.
+
+---
+
+#### 1. Identifying the Top 3 Countries by Total Profit in 2014
+
+**Objective:**  
+Determine the top three countries that generated the highest total profit for the Global Superstore in 2014.
+
+**Approach:**  
+To achieve this, I first ensured the `Orders` table included a column for the year. Then I filtered the data to include only records from 2014 and calculated the total profit by country. Finally, I ranked the countries by their total profit and selected the top three.
+
+**Query:**
+```sql
+-- Add a column to store the year extracted from the shipment date
+ALTER TABLE Orders ADD year INT;
+
+-- Populate the year column with the year of the shipment date
+UPDATE Orders
+SET year = YEAR(Ship_Date);
+
+-- Select the top 3 countries with the highest total profit in 2014
+SELECT TOP 3 Country, ROUND(SUM(Profit), 2) AS total_profit
+FROM Orders
+WHERE year = 2014
+GROUP BY Country
+ORDER BY total_profit DESC;
+```
+
+**Results and Conclusion:**  
+The top three countries in terms of total profit in 2014 were identified as [Country 1], [Country 2], and [Country 3]. This insight helps the business focus on these markets for strategic decisions.
+
+---
+
+#### 2. Analyzing Product Profitability in Key Countries
+
+**Objective:**  
+For the top three countries identified in the previous query, determine the three products that generated the highest profits.
+
+**Approach:**  
+I first filtered the dataset to include only the top three countries and then grouped the data by product name to sum up the profits. The results were ranked to highlight the top three products per country.
+
+**Query:**
+```sql
+-- Create a temporary table for storing profit by country and product
+CREATE TABLE country_by_product AS (
+    SELECT Country, Product_Name, ROUND(SUM(Profit), 2) AS product_profit
+    FROM Orders
+    WHERE Country IN ('United States', 'India', 'China')
+    AND year = 2014
+    GROUP BY Country, Product_Name
+    ORDER BY product_profit DESC
+);
+
+-- Rank the top 3 products by country based on profit
+WITH ranked_products AS (
+    SELECT Country, Product_Name, product_profit,
+           ROW_NUMBER() OVER (PARTITION BY Country ORDER BY product_profit DESC) AS product_rank
+    FROM country_by_product
+)
+SELECT Country, Product_Name, product_profit
+FROM ranked_products
+WHERE product_rank <= 3;
+```
+
+**Results and Conclusion:**  
+The analysis revealed that in the United States, [Product A], [Product B], and [Product C] were the most profitable. Similar insights were derived for India and China, which could guide inventory and marketing strategies.
+
+---
+
+#### 3. Identifying Subcategories with the Highest Shipping Costs in the United States
+
+**Objective:**  
+Identify the three product subcategories with the highest average shipping cost in the United States.
+
+**Approach:**  
+The data was filtered for orders from the United States, and the average shipping cost was calculated per subcategory. The results were then sorted to identify the top three subcategories.
+
+**Query:**
+```sql
+-- Calculate the average shipping cost by subcategory in the United States
+SELECT Sub_Category, ROUND(AVG(Shipping_Cost), 2) AS avg_shipping_cost
+FROM Orders
+WHERE Country = 'United States'
+GROUP BY Sub_Category
+ORDER BY avg_shipping_cost DESC
+LIMIT 3;
+```
+
+**Results and Conclusion:**  
+The subcategories with the highest average shipping costs were [Subcategory 1], [Subcategory 2], and [Subcategory 3]. This insight can inform decisions on pricing or alternative shipping methods to reduce costs.
+
+---
+
+#### 4. Assessing Nigeria's Profitability in 2014
+
+**Objective:**  
+Evaluate Nigeria’s total profitability in 2014 and compare it with other African countries.
+
+**Approach:**  
+The data was filtered to include only records from Africa in 2014. The total profit was then summed up by country and ordered to assess Nigeria’s performance relative to other countries.
+
+**Query:**
+```sql
+-- Calculate total profit by country in Africa for 2014
+SELECT Country, ROUND(SUM(Profit), 2) AS total_profit
+FROM Orders
+WHERE Region = 'Africa'
+AND year = 2014
+GROUP BY Country
+ORDER BY total_profit ASC;
+```
+
+**Results and Conclusion:**  
+Nigeria had a significant loss compared to other African countries. This highlighted the need to explore factors contributing to the poor performance, such as high discounts or shipping costs, as examined in the subsequent analysis.
+
+---
+
+#### 5. Investigating Factors Behind Nigeria's Poor Performance
+
+**Objective:**  
+Identify factors contributing to Nigeria's poor profitability in 2014, focusing on order quantity, shipping costs, and discounts.
+
+**Approach:**  
+The analysis involved aggregating key metrics like the number of orders, total quantity, average shipping cost, and total discounts by country. This data was used to pinpoint areas where Nigeria differed significantly from other countries.
+
+**Query:**
+```sql
+-- Analyze contributing factors to profitability by country in Africa
+SELECT Country, COUNT(Order_ID) AS number_of_orders,
+       SUM(Quantity) AS quantity_of_products,
+       ROUND(AVG(Shipping_Cost), 2) AS average_shipping_cost,
+       ROUND(SUM(Shipping_Cost), 2) AS total_shipping_cost,
+       ROUND(SUM(Discount), 2) AS total_discount,
+       ROUND(AVG(Discount), 2) AS average_discount
+FROM Orders
+WHERE Region = 'Africa'
+AND year = 2014
+GROUP BY Country
+ORDER BY total_discount DESC;
+```
+
+**Results and Conclusion:**  
+The analysis revealed that Nigeria offered significantly higher discounts compared to other African countries, leading to reduced profitability. This suggests a need to revise discount strategies.
+
+---
+
+#### 6. Identifying the Least Profitable Subcategory in Southeast Asia
+
+**Objective:**  
+Determine which product subcategory was the least profitable in Southeast Asia.
+
+**Approach:**  
+The profit for each subcategory was summed up by region, and the subcategory with the lowest total profit was identified.
+
+**Query:**
+```sql
+-- Identify the least profitable subcategory in Southeast Asia
+SELECT Sub_Category, ROUND(SUM(Profit), 2) AS total_profit
+FROM Orders
+WHERE Region = 'Southeast Asia'
+GROUP BY Sub_Category
+ORDER BY total_profit ASC
+LIMIT 1;
+```
+
+**Results and Conclusion:**  
+The `Tables` subcategory was the least profitable in Southeast Asia, particularly in Indonesia. This insight suggests that the company may need to reconsider offering this subcategory in certain markets.
+
+---
+
+#### Conclusion
+
+This portfolio showcases my ability to conduct detailed SQL-based analysis to answer specific business questions. The optimized queries and well-documented approach provide a clear narrative of the analytical process, making the insights actionable for business stakeholders.
