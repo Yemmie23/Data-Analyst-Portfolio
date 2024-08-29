@@ -181,10 +181,10 @@ CREATE TABLE Shipment (
 
 ```sql
 -- Populate ProductCategory table
-INSERT INTO ProductCategory(category_name) VALUES
-    ('Clothings'),
-    ('Electronics'),
-    ('Furniture');
+INSERT INTO ProductCategory(category_name)
+VALUES ('Clothings'),
+       ('Electronics'),
+       ('Furniture');
 
 -- Populate Inventory table
 INSERT INTO Inventory (product_name, Category_id, stock_level) VALUES
